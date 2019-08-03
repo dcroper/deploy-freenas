@@ -2,14 +2,29 @@
 
 deploy-freenas.py is a Python script to deploy TLS certificates to a FreeNAS server using the FreeNAS API.  This should ensure that the certificate data is properly stored in the configuration database, and that all appropriate services use this certificate.  It's intended to be called from a Let's Encrypt client like [acme.sh](https://github.com/Neilpang/acme.sh) after the certificate is issued, so that the entire process of issuance (or renewal) and deployment can be automated.
 
-# Installation
-This script can run on any machine running Python 3 that has network access to your FreeNAS server, but in most cases it's best to run it directly on the FreeNAS box.  Change to a convenient directory and run `git clone https://github.com/danb35/deploy-freenas`.
+This fork of [danb35/deploy-freenas](https://github.com/danb35/deploy-freenas) is packaged to be deployed as a Docker container.
 
-# Usage
+## Installation
 
-The relevant configuration takes place in the `deploy_config` file.  You can create this file either by copying `depoy_config.example` from this repository, or directly using your preferred text editor.  Its format is as follows:
+Run a single excecution of the script:
 
+```sh
+docker run -it --rm --name deploy-freenas -v deploy-freenas:/deploy-freenas dcroper/deploy-freenas:latest
 ```
+
+Run as a daemon:
+
+```sh
+docker run -it --rm --name deploy-freenas -v deploy-freenas:/deploy-freenas dcroper/deploy-freenas:latest deamon
+```
+
+Within the daemon container you can execute `deploy_freenas` to run the script as the Docker image adds the script to the default `$PATH`.
+
+## Usage
+
+The relevant configuration takes place in the `/deploy-freenas/deploy_config` file.  The Docker image will create a `deploy_config` file based on `deploy_config.example` if none exists in the config volume.  Its format is as follows:
+
+```cfg
 [deploy]
 password = YourReallySecureRootPassword
 cert_fqdn = foo.bar.baz
@@ -25,9 +40,3 @@ ftp_enabled = false
 Everything but the password is optional, and the defaults are documented in `depoy_config.example`.
 
 Once you've prepared `deploy_config`, you can run `deploy_freenas.py`.  The intended use is that it would be called by your ACME client after issuing a certificate.  With acme.sh, for example, you'd add `--deploy-hook "/path/to/deploy_freenas.py"` to your command.
-
-There is an optional paramter, `-c` or `--config`, that lets you specify the path to your configuration file. By default the script will try to use `deploy_config` in the script working directoy:
-
-```
-/path/to/deploy_freenas.py --config /somewhere/else/deploy_config
-```
