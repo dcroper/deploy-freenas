@@ -19,7 +19,7 @@ else \n \
  exec -- \"\$@\"\n \
 fi" >/entry.sh && chmod +x /entry.sh
 
-RUN ln -s deploy_freenas.py /usr/local/bin/deploy_freenas
+RUN ln -s /usr/src/app/deploy_freenas.py /usr/local/bin/deploy_freenas
 
 VOLUME /deploy-freenas
 
